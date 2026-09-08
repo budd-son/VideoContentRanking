@@ -23,8 +23,8 @@ def generate_subtitles(audio_path, scenes):
         scene_text = ""
 
         for segment in all_segments:
-
-            if segment.start >= start_time and segment.end <= end_time:
+            midpoint = (segment.start + segment.end) / 2.0
+            if start_time <= midpoint <= end_time:
                 scene_text += segment.text + " "
 
             elif segment.start > end_time:
