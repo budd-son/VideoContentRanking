@@ -1,7 +1,7 @@
 import librosa
 import numpy as np
 
-from src.utils.audio_extracter import extract_audio
+from src.io.audio_extracter import extract_audio
 
 
 def analyze_loudness(video_path, scenes):

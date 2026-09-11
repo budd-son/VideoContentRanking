@@ -1,16 +1,41 @@
-# This is a sample Python script.
+# main.py
+import os
+import pandas as pd
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from src.analysis.audio_analyzer import analyze_loudness
+from src.analysis.scene_detector import detect_scenes
+from src.subtitle_extractor import generate_subtitles
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+path = "data/raw/demo.mp4"
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+print("Этап 1: Детекция сцен...")
+scenes = detect_scenes(path)
+scenes_in_seconds = []
+for start_frame, end_frame in scenes:
+    start_sec = start_frame.seconds
+    end_sec = end_frame.seconds
+    scenes_in_seconds.append((start_sec, end_sec))
+
+print("\nЭтап 2: Генерация субтитров...")
+data_with_subtitles = generate_subtitles(path, scenes_in_seconds)
+
+print("\nЭтап 3: Анализ аудио...")
+loudness_data = analyze_loudness(path, scenes_in_seconds)
+
+final_data = []
+for sub in data_with_subtitles:
+    matching_loudness = next((item for item in loudness_data if item['scene_id'] == sub['scene_id']), {})
+
+    final_data.append({
+        **sub,
+        **matching_loudness
+    })
+
+print("\nЭтап 3: Сохранение в CSV...")
+df = pd.DataFrame(final_data)
+os.makedirs('data/annotations', exist_ok=True)
+df.to_csv('data/annotations/scenes_with_subtitles.csv', index=False)
+
+print(f"Готово! Сохранено строк в data/annotations/scenes_with_subtitles.csv")
