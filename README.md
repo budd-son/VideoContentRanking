@@ -15,6 +15,17 @@
 7. Нормировка признаков (z-score).
 8. Сохранение результата в CSV.
 
+##  Запуск на своём видео
+
+1. Скопируйте ваш фильм в папку `data/raw/`.  
+   Например: `data/raw/my_movie.mp4`
+
+2. В файле `config.yaml` укажите путь к видео и имя выходного CSV:
+   ```yaml
+   video:
+     input_path: "data/raw/my_movie.mp4"
+     output_csv: "data/processed/my_movie_scenes.csv"
+
 ##   Как запустить
 ```bash
 python main.py --config config.yaml
