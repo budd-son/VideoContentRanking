@@ -1,46 +1,24 @@
-#config.yaml - основные параметры проекта
-project:
-  name: VideoContentRanking
-  version: 0.1.0
+video:
+  input_path: "data/raw/demo.mp4"
+  output_csv: "data/processed/demo_scenes.csv"
 
-paths:
-  data_dir: data
-  raw_dir: data/raw
-  audio_dir: data/audioVideoContent
-  annotations_dir: data/annotations
-  processed_dir: data/processed
-  logs_dir: logs
-
-ffmpeg:
-  audio_format: wav
-  audio_codec: pcm_s16le
+audio:
   sample_rate: 16000
+  normalize: true
 
-scene_detection:
-  method: pyscenedetect
-  content_detector_threshold: 30.0
-  min_scene_len_sec: 0.5
+speech:
+  model_size: "small"
+  max_gap: 0.3
 
-asr:
-  model_size: tiny
-  device: cpu
-  vad_filter: true
-  compute_type: int8
+scenes:
+  threshold: 30.0
+  min_duration: 2.0
 
-audio_analysis:
-  rms_hop_length: 512
-  lufs_target: -23.0   # целевой LUFS при нормализации
-  merge_speech_max_gap: 0.5
+features:
+  rms: true
+  lufs: true
+  zscore: true
+  shot_density: true
+paths:
+  audio_out_dir: "data/audio/"
 
-ranking:
-  manual_annotation_file: data/annotations/manual_ranks.csv
-  default_weights:
-    speech_density: 0.4
-    lufs: 0.2
-    avg_rms: 0.15
-    text_length: 0.15
-    duration: 0.1
-
-logging:
-  level: INFO
-  file: logs/app.log

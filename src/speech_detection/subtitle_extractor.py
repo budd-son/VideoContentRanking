@@ -4,8 +4,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def transcribe_audio(wav_path):
-    model = WhisperModel("small", device="cpu", compute_type="int8")
+from faster_whisper import WhisperModel
+
+def transcribe_audio(wav_path, model_size):
+    model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
     segments, _ = model.transcribe(
         wav_path,
@@ -21,5 +23,6 @@ def transcribe_audio(wav_path):
             "end": seg.end,
             "text": seg.text.strip()
         })
-
+    logger.info("Audio transcription complete")
     return result
+

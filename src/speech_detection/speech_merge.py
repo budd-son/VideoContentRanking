@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def merge_speech_moments(segments, max_gap=0.3):
+def merge_speech_moments(segments, max_gap=0.1):
     norm_segments = []
     for s in segments:
         if isinstance(s, dict):
