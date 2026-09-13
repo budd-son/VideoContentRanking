@@ -1,7 +1,5 @@
 import logging
-from typing import List, Dict, Tuple
 
-import librosa
 import numpy as np
 import soundfile as sf
 import pyloudnorm as pyln
@@ -18,8 +16,8 @@ def audio_features(wav_path, scenes):
     meter = pyln.Meter(sr)
     enriched = []
     for row in scenes:
-        start = row["start"]
-        end = row["end"]
+        start = row["start_time"]
+        end = row["end_time"]
         start_sample = int(start * sr)
         end_sample = int(end * sr)
         if start_sample >= end_sample or end_sample>len(audio):

@@ -1,41 +1,37 @@
-# main.py
-import os
-import pandas as pd
+import argparse
 
-from src.analysis.audio_analyzer import analyze_loudness
+from src.data_build.csv_saver import save_scene_table
+from src.io.audio_extracter import extract_audio
+from src.speech_detection.subtitle_extractor import *
+from src.speech_detection.speech_merge import merge_speech_moments
 from src.analysis.scene_detector import detect_scenes
-from src.subtitle_extractor import generate_subtitles
+from src.data_build.scene_builder import build_scene_data
+from src.audio_analysis.audio_analyzer import audio_features
 
 
-path = "data/raw/demo.mp4"
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--video", required=True)
+    parser.add_argument("--output", default="data/scenes/output.csv")
+    return parser.parse_args()
 
 
-print("Этап 1: Детекция сцен...")
-scenes = detect_scenes(path)
-scenes_in_seconds = []
-for start_frame, end_frame in scenes:
-    start_sec = start_frame.seconds
-    end_sec = end_frame.seconds
-    scenes_in_seconds.append((start_sec, end_sec))
+def main():
+    args = parse_args()
 
-print("\nЭтап 2: Генерация субтитров...")
-data_with_subtitles = generate_subtitles(path, scenes_in_seconds)
+    wav = extract_audio(args.video, "data/audio")
 
-print("\nЭтап 3: Анализ аудио...")
-loudness_data = analyze_loudness(path, scenes_in_seconds)
+    visual_scenes = detect_scenes(args.video)
+    speech_raw = transcribe_audio(wav)
+    speech_scenes = merge_speech_moments(speech_raw, max_gap=0.3)
+    scene_rows = build_scene_data(speech_scenes, visual_scenes)
+    print(scene_rows[0])
+    scene_rows = audio_features(wav, scene_rows)
 
-final_data = []
-for sub in data_with_subtitles:
-    matching_loudness = next((item for item in loudness_data if item['scene_id'] == sub['scene_id']), {})
+    save_scene_table(scene_rows, args.output)
 
-    final_data.append({
-        **sub,
-        **matching_loudness
-    })
 
-print("\nЭтап 3: Сохранение в CSV...")
-df = pd.DataFrame(final_data)
-os.makedirs('data/annotations', exist_ok=True)
-df.to_csv('data/annotations/scenes_with_subtitles.csv', index=False)
 
-print(f"Готово! Сохранено строк в data/annotations/scenes_with_subtitles.csv")
+if __name__ == "__main__":
+    main()

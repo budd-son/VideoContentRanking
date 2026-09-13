@@ -1,4 +1,4 @@
-# config.yaml - основные параметры проекта
+#config.yaml - основные параметры проекта
 project:
   name: VideoContentRanking
   version: 0.1.0
