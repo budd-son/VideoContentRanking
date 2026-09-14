@@ -24,6 +24,8 @@ def extract_audio(video_path: str, out_dir: str) -> Optional[str]:
             wav_path,
             format="wav",
             acodec="pcm_s16le",
+            ar=16000,
+            ac=1
         )
         ffmpeg.run(output, capture_stdout=True, capture_stderr=True, overwrite_output=True)
         logger.info("extract audio... to %s", wav_path)
