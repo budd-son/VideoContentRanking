@@ -1,35 +1,34 @@
 def merge_visual_scenes(scenes, max_duration=1.5):
-    scenes = sorted(scenes, key=lambda scene: scene["start_time"])
-
+    scenes = sorted(scenes, key=lambda s: s["start_time"])
     merged = []
     group = []
 
+    def flush():
+        nonlocal group
+        if group:
+            merged.append(_merge_group(group))
+            group = []
+
     for scene in scenes:
         if scene["scene_source"] == "speech":
-            if len(group) > 0:
-                merged.append(_merge_group(group))
-                group = []
+            flush()
+            merged.append(scene)          # сохраняем сцену речи
+            continue
+
+        duration = scene["end_time"] - scene["start_time"]
+        if duration <= max_duration:
+            group.append(scene)
         else:
-            duration = scene["end_time"] - scene["start_time"]
-            if duration <= max_duration:
-                group.append(scene)
-            else:
-                if len(group) > 0:
-                    merged.append(_merge_group(group))
-                    group = []
+            flush()
+            merged.append(scene)          # сохраняем длинную сцену
 
-    if len(group) > 0:
-        merged.append(_merge_group(group))
-    else:
-        merged.extend(group)
-
+    flush()
     return merged
 
 
 def _merge_group(group):
     start = group[0]["start_time"]
     end = group[-1]["end_time"]
-
     return {
         "start_time": start,
         "end_time": end,
