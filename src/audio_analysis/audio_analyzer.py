@@ -23,6 +23,7 @@ def audio_features(wav_path, scenes):
         if start_sample >= end_sample or end_sample > len(audio):
             row["avg_rms"] = np.nan
             row["max_rms"] = np.nan
+            row["rms_var"] = np.nan
             row["lufs"] = np.nan
             row["is_silent"] = True
             enriched.append(row)
@@ -33,6 +34,15 @@ def audio_features(wav_path, scenes):
 
         rms = np.sqrt(np.mean(segment**2))
         max_rms = np.sqrt(np.max(segment**2))
+
+        window_size = int(sr * 0.05)  # 50 мс
+        rms_values = []
+        for i in range(0, len(segment), window_size):
+            win = segment[i:i+window_size]
+            if len(win) == 0:
+                continue
+            rms_values.append(np.sqrt(np.mean(win**2)))
+        rms_var = float(np.var(rms_values)) if rms_values else 0.0
 
         try:
             lufs = meter.integrated_loudness(segment)
@@ -48,9 +58,11 @@ def audio_features(wav_path, scenes):
 
         row["avg_rms"] = float(rms)
         row["max_rms"] = float(max_rms)
+        row["rms_var"] = rms_var   # CHANGED: сохраняем дисперсию
 
         enriched.append(row)
 
     logger.info("Audio processing %s complete", wav_path)
     return enriched
+
 
