@@ -1,6 +1,7 @@
 import argparse
 import logging
 
+from data_build.result_prepare import result
 from openCvAction import action_feature, agregate_action
 from openCvAction.normilize_action import normalize_motion_features
 from src.utils.config_loader import load_config
@@ -60,6 +61,7 @@ def main():
     logging.info("Normalize motion features...")
     scene_rows = normalize_motion_features(scene_rows)
 
+    scene_rows = result(scene_rows)
     logging.info("Saving CSV...")
     save_scene_table(scene_rows, output_csv)
 
