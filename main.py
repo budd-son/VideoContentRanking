@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+from openCvAction import action_feature, agregate_action
+from openCvAction.normilize_action import normalize_motion_features
 from src.utils.config_loader import load_config
 from src.analysis.scene_detector import detect_scenes
 from src.io.audio_extracter import extract_audio
@@ -32,6 +34,9 @@ def main():
     logging.info("Detecting visual scenes...")
     visual_scenes = detect_scenes(video_path, threshold=config["scenes"]["threshold"])
 
+    logging.info("Calculating action features...")
+    motion_rows = action_feature.analise_action(video_path)
+
     logging.info("Transcribing audio...")
     speech_raw = transcribe_audio(wav, model_size=config["speech"]["model_size"])
 
@@ -44,9 +49,16 @@ def main():
     logging.info("Extracting audio features...")
     scene_rows = audio_features(wav, scene_rows)
 
+
     if config["audio"]["normalize"]:
         logging.info("Normalizing audio features...")
         scene_rows = normalize_audio_features(scene_rows)
+    #print(motion_rows)
+    logging.info("  Agregate actions...")
+    scene_rows = agregate_action.aggregate_motion_features(scene_rows, motion_rows, True, 5)
+
+    logging.info("Normalize motion features...")
+    scene_rows = normalize_motion_features(scene_rows)
 
     logging.info("Saving CSV...")
     save_scene_table(scene_rows, output_csv)

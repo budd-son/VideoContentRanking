@@ -25,8 +25,6 @@ def analise_action(video_path):
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fps_src      = cap.get(cv2.CAP_PROP_FPS) or 30
-    print(f"Video: {video_name}, frames: {total_frames}, fps: {fps_src:.1f}")
-    print(f"Scale: {SCALE}, step: {FRAME_STEP} → ~{fps_src/FRAME_STEP:.1f} обрабатываемых fps")
 
     backSub = cv2.createBackgroundSubtractorMOG2(
         history=1000, varThreshold=60, detectShadows=True
@@ -88,7 +86,11 @@ def analise_action(video_path):
         if len(buf) > BUF_SIZE:
             buf.pop(0)
 
-        mr, lr, sp, de = np.mean(buf, axis=0)
+        if buf:
+            mr, lr, sp, de = np.mean(buf, axis=0)
+        else:
+            mr, lr, sp, de = 0.0, 0.0, 0.0, 0.0
+
         rows.append((frame_idx, mr, lr, sp, de))
 
 
@@ -100,3 +102,4 @@ def analise_action(video_path):
         w = csv.writer(f)
         w.writerow(["frame", "motion_ratio", "largest_ratio", "mean_speed", "dir_entropy"])
         w.writerows(rows)
+    return rows
