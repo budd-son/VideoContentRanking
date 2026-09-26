@@ -12,6 +12,7 @@ from src.speech_detection.speech_merge import merge_speech_moments
 from src.audio_analysis.audio_analyzer import audio_features
 from src.audio_analysis.normilize_audio import normalize_audio_features
 from src.data_build.csv_saver import save_scene_table
+from utils.plot_act_score import plot_motion_debug
 
 logging.basicConfig(level=logging.INFO)
 
@@ -68,6 +69,9 @@ def main():
     logging.info("Normalize motion features...")
     scene_rows = normalize_motion_features(scene_rows)
 
+
+    #проверка графиком
+    #plot_motion_debug("./data/interim/demo.csv", scene_rows, fps_src)
 
     #scene_rows = result(scene_rows)
     logging.info("Saving CSV...")

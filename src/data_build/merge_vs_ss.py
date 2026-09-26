@@ -11,7 +11,7 @@ def build_scene_data(visual_scenes, speech_scenes):
         s_start = s_scene["start_time"]
         s_end = s_scene["end_time"]
         vs_count = 0
-
+        cut_times = []
         while ind_vs < len(visual_scenes):
             v = visual_scenes[ind_vs]
             v_start = v["start_time"]
@@ -23,11 +23,12 @@ def build_scene_data(visual_scenes, speech_scenes):
             if v_end <= s_start:
                 result.append({**v,
                                "duration": v_end - v_start,
-                               "type": "visual", "cuts": 1.0})
+                               "type": "visual", "cuts": 1.0, "cut_times": v_start})
                 ind_vs += 1
                 continue
 
             vs_count += 1
+            cut_times.append(v["start_time"])
             if v_start < s_start:
                 if v_end > s_start:
                     vs_count += 1
@@ -37,7 +38,8 @@ def build_scene_data(visual_scenes, speech_scenes):
                                "end_time":   v_end,
                                "duration":   v_end - v_start,
                                "cuts": vs_count,
-                               "type": "visual"})
+                               "type": "visual",
+                               "cut_times": cut_times})
 
             if v_end > s_end:
                 visual_scenes[ind_vs] = {**v, "start_time": s_end}
@@ -47,14 +49,16 @@ def build_scene_data(visual_scenes, speech_scenes):
 
         result.append({**s_scene,
                        "duration": s_end - s_start,
-                       "type": "speech", "cuts": vs_count, "cuts_per_sec": vs_count/(s_end - s_start)})
+                       "type": "speech", "cuts": vs_count, "cut_per_sec": vs_count/(s_end - s_start), "cut_times": cut_times})
 
 
     while ind_vs < len(visual_scenes):
         v = visual_scenes[ind_vs]
+        cut_times = []
+        cut_times.append(v["start_time"])
         result.append({**v,
                        "duration": v["end_time"] - v["start_time"],
-                       "type": "visual", "cuts": 1.0})
+                       "type": "visual", "cuts": 1.0, "cut_times": cut_times, "cut_per_sec": 1.0/(v["end_time"] - v["start_time"])})
         ind_vs += 1
 
     result.sort(key=lambda x: x["start_time"])
@@ -88,7 +92,8 @@ def merge_vs(scenes):
 def merge(scenes):
     start = scenes[0]["start_time"]
     end = scenes[-1]["end_time"]
+    cut_times = [x["start_time"] for x in scenes]
     duration = end - start
     cuts = len(scenes)
     return {"start_time": start, "end_time": end, "duration": duration,
-            "cuts": cuts, "type": "visual", "cuts_per_sec": cuts / duration}
+            "cuts": cuts, "type": "visual", "cut_per_sec": cuts / duration, "cut_times": cut_times}
