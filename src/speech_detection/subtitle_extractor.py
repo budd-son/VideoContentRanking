@@ -19,8 +19,8 @@ def transcribe_audio(wav_path, model_size):
     result = []
     for seg in segments:
         result.append({
-            "start": seg.start,
-            "end": seg.end,
+            "start_time": seg.start,
+            "end_time": seg.end,
             "text": seg.text.strip()
         })
     logger.info("Audio transcription complete")

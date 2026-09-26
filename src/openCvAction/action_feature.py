@@ -102,4 +102,4 @@ def analise_action(video_path):
         w = csv.writer(f)
         w.writerow(["frame", "motion_ratio", "largest_ratio", "mean_speed", "dir_entropy"])
         w.writerows(rows)
-    return rows
+    return rows, fps_src

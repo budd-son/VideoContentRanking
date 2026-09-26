@@ -16,8 +16,8 @@ def detect_scenes(video_path: str, threshold: float = 30.0) -> List[Tuple[float,
         except Exception as e:
             start, end = float(i[0]), float(i[1])
         scene_data.append({
-            "start": start,
-            "end": end
+            "start_time": start,
+            "end_time": end
         })
     logger.info("detected %s scenes", len(scene_data))
     return scene_data

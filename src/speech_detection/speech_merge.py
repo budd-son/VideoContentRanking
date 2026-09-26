@@ -7,28 +7,28 @@ def merge_speech_moments(segments, max_gap=0.1):
     for s in segments:
         if isinstance(s, dict):
             norm_segments.append({
-                "start": float(s["start"]),
-                "end": float(s["end"]),
+                "start_time": float(s["start_time"]),
+                "end_time": float(s["end_time"]),
                 "text": s.get("text", "")
             })
         else:
             norm_segments.append({
-                "start": float(s[0]),
-                "end": float(s[1]),
+                "start_time": float(s[0]),
+                "end_time": float(s[1]),
                 "text": ""
             })
 
     if not norm_segments:
         return []
 
-    norm_segments = sorted(norm_segments, key=lambda s: s["start"])
+    norm_segments = sorted(norm_segments, key=lambda s: s["start_time"])
 
     merged = []
     current = norm_segments[0].copy()
 
     for seg in norm_segments[1:]:
-        if seg["start"] - current["end"] < max_gap:
-            current["end"] = seg["end"]
+        if seg["start_time"] - current["end_time"] < max_gap:
+            current["end_time"] = seg["end_time"]
             current["text"] = (current["text"] + " " + seg["text"]).strip()
         else:
             merged.append(current)

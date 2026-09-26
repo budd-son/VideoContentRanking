@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from data_build.result_prepare import result
+from data_build.merge_vs_ss import build_scene_data
 from openCvAction import action_feature, agregate_action
 from openCvAction.normilize_action import normalize_motion_features
 from src.utils.config_loader import load_config
@@ -9,7 +9,6 @@ from src.analysis.scene_detector import detect_scenes
 from src.io.audio_extracter import extract_audio
 from src.speech_detection.subtitle_extractor import transcribe_audio
 from src.speech_detection.speech_merge import merge_speech_moments
-from src.data_build.scene_builder import build_scene_data
 from src.audio_analysis.audio_analyzer import audio_features
 from src.audio_analysis.normilize_audio import normalize_audio_features
 from src.data_build.csv_saver import save_scene_table
@@ -21,6 +20,8 @@ def parse_args():
     parser.add_argument("--config", default="config.yaml", help="Path to config file")
     return parser.parse_args()
 
+
+
 def main():
     args = parse_args()
     config = load_config(args.config)
@@ -31,12 +32,8 @@ def main():
     logging.info("Extracting audio...")
     wav = extract_audio(video_path, out_dir=config["paths"]["audio_out_dir"])
 
-
     logging.info("Detecting visual scenes...")
     visual_scenes = detect_scenes(video_path, threshold=config["scenes"]["threshold"])
-
-    logging.info("Calculating action features...")
-    motion_rows = action_feature.analise_action(video_path)
 
     logging.info("Transcribing audio...")
     speech_raw = transcribe_audio(wav, model_size=config["speech"]["model_size"])
@@ -45,7 +42,17 @@ def main():
     speech_scenes = merge_speech_moments(speech_raw, max_gap=config["speech"]["max_gap"])
 
     logging.info("Building scene table...")
-    scene_rows = build_scene_data(visual_scenes, speech_scenes, min_duration=config["scenes"]["min_duration"])
+    scene_rows = build_scene_data(visual_scenes, speech_scenes)
+
+
+
+
+    logging.info("Calculating action features...")
+    motion_rows, fps_src = action_feature.analise_action(video_path)
+
+
+
+
 
     logging.info("Extracting audio features...")
     scene_rows = audio_features(wav, scene_rows)
@@ -56,12 +63,13 @@ def main():
         scene_rows = normalize_audio_features(scene_rows)
     #print(motion_rows)
     logging.info("  Agregate actions...")
-    scene_rows = agregate_action.aggregate_motion_features(scene_rows, motion_rows, True, 5)
+    scene_rows = agregate_action.aggregate_motion_features(scene_rows, motion_rows, fps_src, 5)
 
     logging.info("Normalize motion features...")
     scene_rows = normalize_motion_features(scene_rows)
 
-    scene_rows = result(scene_rows)
+
+    #scene_rows = result(scene_rows)
     logging.info("Saving CSV...")
     save_scene_table(scene_rows, output_csv)
 
