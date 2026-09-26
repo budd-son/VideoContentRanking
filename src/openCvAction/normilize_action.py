@@ -11,8 +11,11 @@ def normalize_motion_features(scenes):
     stats = {}
     for key, vals in features.items():
         arr = np.array([v for v in vals if np.isfinite(v)], dtype=float)
-        mean = arr.mean() if arr.size > 0 else 0.0
-        std  = arr.std(ddof=0) if arr.size > 0 else 1.0
+        if arr.size == 0:
+            stats[key] = (np.nan, np.nan)
+            continue
+        mean = arr.mean()
+        std  = arr.std(ddof=0)
         if std <= 0 or not np.isfinite(std):
             std = 1.0
         stats[key] = (mean, std)
@@ -20,10 +23,9 @@ def normalize_motion_features(scenes):
     for s in scenes:
         for key, (mean, std) in stats.items():
             val = s.get(key, np.nan)
-            if np.isfinite(val):
+            if np.isfinite(val) and np.isfinite(mean) and np.isfinite(std):
                 s[f"{key}_z"] = (val - mean) / std
             else:
-                s[f"{key}_z"] = 0.0
+                s[f"{key}_z"] = np.nan
 
     return scenes
-
