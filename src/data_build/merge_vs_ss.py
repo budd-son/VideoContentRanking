@@ -47,7 +47,7 @@ def build_scene_data(visual_scenes, speech_scenes):
 
         result.append({**s_scene,
                        "duration": s_end - s_start,
-                       "type": "speech", "cuts": vs_count})
+                       "type": "speech", "cuts": vs_count, "cuts_per_sec": vs_count/(s_end - s_start)})
 
 
     while ind_vs < len(visual_scenes):
@@ -91,4 +91,4 @@ def merge(scenes):
     duration = end - start
     cuts = len(scenes)
     return {"start_time": start, "end_time": end, "duration": duration,
-            "cuts": cuts, "type": "visual"}
+            "cuts": cuts, "type": "visual", "cuts_per_sec": cuts / duration}
