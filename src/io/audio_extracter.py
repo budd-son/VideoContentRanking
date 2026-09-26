@@ -7,7 +7,7 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-ffmpeg._run.DEFAULT_CMD = r"C:\ffmpeg-N-126475-g35b7df64a0-win64-gpl-shared\bin\ffmpeg.exe"
+
 
 
 def extract_audio(video_path: str, out_dir: str) -> Optional[str]:

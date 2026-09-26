@@ -1,9 +1,9 @@
 import argparse
 import logging
 
-from data_build.merge_vs_ss import build_scene_data
-from openCvAction import action_feature, agregate_action
-from openCvAction.normilize_action import normalize_motion_features
+from src.data_build.merge_vs_ss import build_scene_data
+from src.openCvAction import action_feature, agregate_action
+from src.openCvAction.normilize_action import normalize_motion_features
 from src.utils.config_loader import load_config
 from src.analysis.scene_detector import detect_scenes
 from src.io.audio_extracter import extract_audio
