@@ -74,10 +74,17 @@ def analise_action(video_path, cut_times_sec = None):
         res_mag = np.linalg.norm(residual, axis=2)
         object_motion = float(res_mag.mean()) / SCALE
 
-        ang = np.arctan2(flow[..., 1], flow[..., 0])
-        hist, _ = np.histogram(ang, bins=8, range=(-np.pi, np.pi))
-        p = hist / (hist.sum() + 1e-9)
-        dir_entropy = float(-np.sum(p * np.log2(p + 1e-9)))
+        #MAG_THRESHHOLD ВЫНЕСТИ В КОНФИГ ПОДОБРАТЬ ЭМПИРИЧЕСКИ
+        MAG_THRESHOLD = 0.5
+        MIN_PIXELS = 100
+        mask = res_mag > MAG_THRESHOLD
+        if mask.sum() < MIN_PIXELS:
+            dir_entropy = float('nan')
+        else:
+            ang = np.arctan2(flow[..., 1], flow[..., 0])
+            hist, _ = np.histogram(ang, bins=8, range=(-np.pi, np.pi))
+            p = hist / (hist.sum() + 1e-9)
+            dir_entropy = float(-np.sum(p * np.log2(p + 1e-9)))
         prev_gray = gray
         prev_frame_idx = frame_idx
         rows.append((frame_idx, motion_mean, camera_motion,
