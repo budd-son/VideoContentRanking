@@ -63,7 +63,7 @@ def analise_action(video_path, cut_times_sec = None):
 
         flow = dis.calc(prev_gray, gray, None)
         mag = np.linalg.norm(flow, axis=2)
-        motion_mean = float(mag.mean()) / SCALE
+
 
         median_flow = np.median(flow.reshape(-1, 2), axis=0)
         camera_motion = float(np.linalg.norm(median_flow)) / SCALE
@@ -87,7 +87,7 @@ def analise_action(video_path, cut_times_sec = None):
             dir_entropy = float(-np.sum(p * np.log2(p + 1e-9)))
         prev_gray = gray
         prev_frame_idx = frame_idx
-        rows.append((frame_idx, motion_mean, camera_motion,
+        rows.append((frame_idx,  camera_motion,
                      object_motion, dir_entropy))
 
     cap.release()
@@ -95,7 +95,7 @@ def analise_action(video_path, cut_times_sec = None):
     csv_path = os.path.join(OUT_DIR, f"{video_name}.csv")
     with open(csv_path, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["frame", "motion_mean", "camera_motion",
+        w.writerow(["frame",  "camera_motion",
                     "object_motion", "dir_entropy"])
         w.writerows(rows)
     return rows, fps_src

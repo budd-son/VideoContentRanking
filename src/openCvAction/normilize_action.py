@@ -2,7 +2,6 @@ import numpy as np
 
 def normalize_motion_features(scenes):
     features = {
-        "motion":  [s.get("motion", np.nan)  for s in scenes],
         "camera":  [s.get("camera", np.nan)  for s in scenes],
         "object":  [s.get("object", np.nan)  for s in scenes],
         "entropy": [s.get("entropy", np.nan) for s in scenes],
