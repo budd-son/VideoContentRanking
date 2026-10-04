@@ -49,7 +49,7 @@ def main():
 
 
     logging.info("Calculating action features...")
-    motion_rows, fps_src = action_feature.analise_action(video_path)
+    motion_rows, fps_src = action_feature.analise_action(video_path, visual_scenes);
 
 
 
@@ -70,8 +70,8 @@ def main():
     scene_rows = normalize_motion_features(scene_rows)
 
 
-    #проверка графиком
-    #plot_motion_debug("./data/interim/demo.csv", scene_rows, fps_src)
+
+    plot_motion_debug("./data/interim/demo.csv", scene_rows, fps_src)
 
     #scene_rows = result(scene_rows)
     logging.info("Saving CSV...")

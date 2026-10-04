@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 
-def analise_action(video_path):
+def analise_action(video_path, cut_times_sec = None):
     VIDEO_PATH = video_path
     OUT_DIR    = "./data/interim"
 
@@ -20,7 +20,22 @@ def analise_action(video_path):
         raise SystemExit("Cannot open video")
 
     fps_src = cap.get(cv2.CAP_PROP_FPS) or 30
+    cut_frames = []
+    if cut_times_sec:
+        cut_frames = sorted(
+            int(round(item['start_time'] * fps_src))
+            for item in cut_times_sec
+        )
 
+    def has_cut_between(f1, f2):
+        for cf in cut_frames:
+            if f1 < cf <= f2:
+                return True
+            if cf > f2:
+                break
+        return False
+
+    prev_frame_idx = None
     prev_gray = None
     rows = []
     frame_idx = 0
@@ -38,7 +53,12 @@ def analise_action(video_path):
         gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
 
         if prev_gray is None:
+            prev_frame_idx = frame_idx
             prev_gray = gray
+            continue
+        if has_cut_between(prev_frame_idx, frame_idx):
+            prev_gray = gray
+            prev_frame_idx = frame_idx
             continue
 
         flow = dis.calc(prev_gray, gray, None)
@@ -49,14 +69,17 @@ def analise_action(video_path):
         camera_motion = float(np.linalg.norm(median_flow)) / SCALE
 
         residual = flow - median_flow
-        object_motion = float(np.linalg.norm(residual, axis=2).mean()) / SCALE
+        #object_motion = float(np.linalg.norm(residual, axis=2).mean()) / SCALE
+        #то же самое крч переписано ток
+        res_mag = np.linalg.norm(residual, axis=2)
+        object_motion = float(res_mag.mean()) / SCALE
 
         ang = np.arctan2(flow[..., 1], flow[..., 0])
         hist, _ = np.histogram(ang, bins=8, range=(-np.pi, np.pi))
         p = hist / (hist.sum() + 1e-9)
         dir_entropy = float(-np.sum(p * np.log2(p + 1e-9)))
-
         prev_gray = gray
+        prev_frame_idx = frame_idx
         rows.append((frame_idx, motion_mean, camera_motion,
                      object_motion, dir_entropy))
 
