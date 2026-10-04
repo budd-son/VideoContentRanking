@@ -75,7 +75,7 @@ def analise_action(video_path, cut_times_sec = None):
         object_motion = float(res_mag.mean()) / SCALE
 
         #MAG_THRESHHOLD ВЫНЕСТИ В КОНФИГ ПОДОБРАТЬ ЭМПИРИЧЕСКИ
-        MAG_THRESHOLD = 0.5
+        MAG_THRESHOLD = 1.0
         MIN_PIXELS = 100
         mask = res_mag > MAG_THRESHOLD
         if mask.sum() < MIN_PIXELS:
