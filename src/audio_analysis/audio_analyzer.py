@@ -33,7 +33,8 @@ def audio_features(wav_path, scenes):
         segment = audio[start_sample:end_sample]
 
         rms = np.sqrt(np.mean(segment**2))
-        max_rms = np.sqrt(np.max(segment**2))
+        #теперь считаем по окнам
+        #max_rms = np.sqrt(np.max(segment**2))
 
         window_size = int(sr * 0.05)  # 50 мс
         rms_values = []
@@ -42,7 +43,14 @@ def audio_features(wav_path, scenes):
             if len(win) == 0:
                 continue
             rms_values.append(np.sqrt(np.mean(win**2)))
-        rms_var = float(np.var(rms_values)) if rms_values else 0.0
+        rms_var = float(np.var(rms_values))
+        if rms_values:
+            rms_values = np.array(rms_values)
+            max_rms = float(np.percentile(rms_values, 95))
+            rms_var = float(np.var(rms_values))
+        else:
+            max_rms = 0.0
+            rms_var = 0.0
 
         try:
             lufs = meter.integrated_loudness(segment)
